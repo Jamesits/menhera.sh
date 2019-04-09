@@ -12,6 +12,10 @@ with only SSH!
 
 "menhera" is short for "mental healer". 
 
+## WARNING
+
+> I am not responsible for bricked devices, dead HDDs and SSDs, unreplied tickets, thermonuclear war, or you getting fired because your device is hacked to mine bitcoin. Please do some research if you have any concerns about this script before using it! YOU are choosing to run this script, and if you point the finger at me for messing up your device, I will laugh at you.
+
 ## Dependencies
 
   * Linux kernel: overlayfs and tmpfs support
