@@ -103,6 +103,9 @@ swap_root() {
     for i in dev proc sys run; do mount --move "${OLDROOT}/$i" "${NEWROOT}/$i"; done
     mount -t tmpfs tmpfs "${NEWROOT}/tmp"
 
+    mkdir -p "${WORKDIR}"
+    mount --move "${OLDROOT}/${WORKDIR}" "${WORKDIR}"
+
     echo "Restarting SSH daemon..."
     systemctl restart ssh
 }
