@@ -2,7 +2,7 @@
 
 Start a RAM Linux system (Debian for now) without requiring physical access to your server.
 
-With menhera.sh you can:
+With `menhera.sh` you can:
   * format your system disk or create RAID
   * install a new distro
   * do important maintenance or backup with nobody writing to your root filesystem
