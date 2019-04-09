@@ -102,12 +102,12 @@ swap_root() {
     # move mounts
     for i in dev proc sys run; do mount --move "${OLDROOT}/$i" "${NEWROOT}/$i"; done
     mount -t tmpfs tmpfs "${NEWROOT}/tmp"
+
+    echo "Restarting SSH daemon..."
+    systemctl restart ssh
 }
 
 clear_processes() {
-    echo "Restarting SSH daemon..."
-    systemctl restart ssh
-
     echo "Disabling swap..."
     swapoff -a
 
