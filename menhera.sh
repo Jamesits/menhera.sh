@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 # config
 WORKDIR="/tmp/menhera"
-ROOTFS="https://images.linuxcontainers.org/images/debian/stretch/amd64/default/20190406_05:24/rootfs.squashfs"
+ROOTFS="https://images.linuxcontainers.org/images/debian/stretch/amd64/default/20190409_05:24/rootfs.squashfs"
 
 # internal global variables
 OLDROOT="/"
