@@ -49,7 +49,7 @@ prepare_environment() {
     mkdir -p "${WORKDIR}/overlayfs_workdir"
 
     echo "Downloading temporary rootfs..."
-    wget "${ROOTFS}" -O "${WORKDIR}/rootfs.squashfs"
+    wget -c "${ROOTFS}" -O "${WORKDIR}/rootfs.squashfs"
 }
 
 mount_new_rootfs() {
