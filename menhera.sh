@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 # config
 WORKDIR="/tmp/menhera"
-ROOTFS="https://images.linuxcontainers.org/images/debian/stretch/amd64/default/20190409_05:24/rootfs.squashfs"
+ROOTFS=""
 
 # internal global variables
 OLDROOT="/"
@@ -21,6 +21,16 @@ confirm() {
             false
             ;;
     esac
+}
+
+get_rootfs() {
+    if [ -z ${ROOTFS+x} ]; then 
+        echo "Getting rootfs URL..."
+        ROOTFS_TIME=$(curl "https://uk.images.linuxcontainers.org/images/debian/stretch/amd64/default/?C=M;O=D" | grep "folder.gif" | head -n 1 | cut -d'>' -f7 | cut -d'/' -f1)
+        ROOTFS="https://images.linuxcontainers.org/images/debian/stretch/amd64/default/${ROOTFS_TIME}/rootfs.squashfs"
+    else 
+        echo "\$ROOTFS is set to '$ROOTFS'"
+    fi
 }
 
 sync_filesystem() {
@@ -135,6 +145,7 @@ echo -e "\tYou have closed all programs you can, and backed up all important dat
 echo -e "\tYou can SSH into your system as root user"
 confirm || exit -1
 
+get_rootfs
 sync_filesystem
 
 prepare_environment
