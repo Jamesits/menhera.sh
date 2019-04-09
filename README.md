@@ -25,11 +25,29 @@ with only SSH!
 
 ## Usage
 
-Just download and run.
+Just run the script, and follow the instructions. 
 
-## Known issues
+`menhera.sh` will try to download a new rootfs into the memory, replace the old rootfs and kill all processes reading the old rootfs. The old rootfs will be mounted to `/mnt/oldroot`. An example filesystem structure after running `menhera.sh` on my test VPS:
 
-  * Cannot auto detect rootfs URL
+```
+root@localhost:~# findmnt
+TARGET                                SOURCE     FSTYPE     OPTIONS
+/                                     overlay    overlay    rw,relatime,lowerdir=/tmp/menhera/newrootro,upperdir=/tmp/menhera/newrootrw,workdir=/tmp/menhera/overlayfs_workdir
+├─/sys                                sysfs      sysfs      rw,nosuid,nodev,noexec,relatime
+│ ├─/sys/kernel/security              securityfs securityfs rw,nosuid,nodev,noexec,relatime
+│ ├─/sys/fs/cgroup                    tmpfs      tmpfs      ro,nosuid,nodev,noexec,mode=755
+│ │ └─/sys/fs/cgroup/...
+│ └─/sys/kernel/debug                 debugfs    debugfs    rw,relatime
+├─/proc                               proc       proc       rw,nosuid,nodev,noexec,relatime
+├─/dev                                udev       devtmpfs   rw,nosuid,relatime,size=1014856k,nr_inodes=253714,mode=755
+│ └─/dev/...
+├─/run                                tmpfs      tmpfs      rw,nosuid,noexec,relatime,size=205236k,mode=755
+│ └─/run/lock                         tmpfs      tmpfs      rw,nosuid,nodev,noexec,relatime,size=5120k
+├─/mnt/oldroot                        /dev/md0p1 ext4       rw,relatime,discard,data=ordered
+└─/tmp                                tmpfs      tmpfs      rw,relatime
+  └─/tmp/menhera                      tmpfs      tmpfs      rw,relatime
+    └─/tmp/menhera/newrootro          /dev/loop0 squashfs   ro,relatime
+```
 
 ## Thanks
 
