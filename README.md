@@ -21,7 +21,7 @@ with only SSH!
   * Linux kernel: overlayfs and tmpfs support
   * systemd
   * squashfs-tools
-  * wget
+  * curl
 
 ## Usage
 

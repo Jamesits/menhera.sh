@@ -24,7 +24,7 @@ confirm() {
 }
 
 get_rootfs() {
-    if [ -z ${ROOTFS+x} ]; then 
+    if [ -n ${ROOTFS} ]; then 
         echo "Getting rootfs URL..."
         ROOTFS_TIME=$(curl "https://uk.images.linuxcontainers.org/images/debian/stretch/amd64/default/?C=M;O=D" | grep "folder.gif" | head -n 1 | cut -d'>' -f7 | cut -d'/' -f1)
         ROOTFS="https://images.linuxcontainers.org/images/debian/stretch/amd64/default/${ROOTFS_TIME}/rootfs.squashfs"
@@ -59,7 +59,7 @@ prepare_environment() {
     mkdir -p "${WORKDIR}/overlayfs_workdir"
 
     echo "Downloading temporary rootfs..."
-    wget -c "${ROOTFS}" -O "${WORKDIR}/rootfs.squashfs"
+    curl -LC -o "${WORKDIR}/rootfs.squashfs" - "${ROOTFS}"
 }
 
 mount_new_rootfs() {
