@@ -81,7 +81,7 @@ NOTICE
 This is a minimal RAM system created by menhera.sh. Feel free to format your disk, but don't blame anyone
 except yourself if you lost important files or your system is broken.
 
-Download menhera.sh at https://github.com/Jamesits/manhera.sh
+Download menhera.sh at https://github.com/Jamesits/menhera.sh
 
 Have a lot of fun...
 EOF
