@@ -137,8 +137,8 @@ sync_filesystem
 
 prepare_environment
 mount_new_rootfs
-install_software
 copy_config
+install_software
 swap_root
 
 set +x
