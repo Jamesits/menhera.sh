@@ -74,6 +74,17 @@ copy_config() {
     ! cp -axr "${OLDROOT}/root/.ssh" "${NEWROOT}/root"
 
     chroot "${NEWROOT}" chsh -s /bin/bash root
+
+    cat > "${NEWROOT}/etc/motd" <<EOF
+NOTICE
+
+This is a minimal RAM system created by menhera.sh. Feel free to format your disk, but don't blame anyone
+except yourself if you lost important files or your system is broken.
+
+Download menhera.sh at https://github.com/Jamesits/manhera.sh
+
+Have a lot of fun...
+EOF
 }
 
 swap_root() {
@@ -97,30 +108,16 @@ clear_processes() {
     echo "Restarting SSH daemon..."
     systemctl restart ssh
 
+    echo "Disabling swap..."
+    swapoff -a
+
     echo "Restarting systemd..."
     systemctl daemon-reexec --no-block
     sleep 15
 
     echo "Killing all programs still using the old root..."
     fuser -kvm "${OLDROOT}" -15
-    sleep 15
-    fuser -kvm "${OLDROOT}" -9
-    sleep 3
-
-    echo "Disabling swap..."
-    swapoff -a
-}
-
-unmount_old_rootfs() {
-    echo "Unmounting old rootfs..."
-    umount "${OLDROOT}"
-}
-
-cleanup() {
-    # some cleanup needed after the process quits
-    sleep 1
-    clear_processes
-    unmount_old_rootfs
+    # in most cases the parent process of this script will be killed, so goodbye
 }
 
 if [[ $EUID -ne 0 ]]; then
@@ -147,5 +144,4 @@ echo -e "If you are connecting from SSH, please create a second session to this 
 echo -e "After your confirmation, we are going to kill the old SSH server."
 confirm || exit -1
 
-cleanup &
-disown
+clear_processes
