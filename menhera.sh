@@ -59,7 +59,7 @@ prepare_environment() {
     mkdir -p "${WORKDIR}/overlayfs_workdir"
 
     echo "Downloading temporary rootfs..."
-    curl -LC -o "${WORKDIR}/rootfs.squashfs" - "${ROOTFS}"
+    curl -L -C - -o "${WORKDIR}/rootfs.squashfs" "${ROOTFS}"
 }
 
 mount_new_rootfs() {
