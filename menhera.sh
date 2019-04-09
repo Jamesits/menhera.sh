@@ -68,10 +68,10 @@ install_software() {
 
 copy_config() {
     echo "Copying important config into new rootfs..."
-    cp -ax "${OLDROOT}/etc/resolv.conf" "${NEWROOT}/etc"
-    cp -axr "${OLDROOT}/etc/ssh" "${NEWROOT}/etc"
-    cp -ax "${OLDROOT}/etc/"{passwd,shadow} "${NEWROOT}/etc"
-    cp -axr "${OLDROOT}/root/.ssh" "${NEWROOT}/root"
+    ! cp -ax "${OLDROOT}/etc/resolv.conf" "${NEWROOT}/etc"
+    ! cp -axr "${OLDROOT}/etc/ssh" "${NEWROOT}/etc"
+    ! cp -ax "${OLDROOT}/etc/"{passwd,shadow} "${NEWROOT}/etc"
+    ! cp -axr "${OLDROOT}/root/.ssh" "${NEWROOT}/root"
 
     chroot "${NEWROOT}" chsh -s /bin/bash root
 }
