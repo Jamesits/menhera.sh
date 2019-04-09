@@ -92,12 +92,17 @@ copy_config() {
     chroot "${NEWROOT}" chsh -s /bin/bash root
 
     cat > "${NEWROOT}/etc/motd" <<EOF
+
+Download menhera.sh at https://github.com/Jamesits/menhera.sh
+
 !!!NOTICE!!!
 
 This is a minimal RAM system created by menhera.sh. Feel free to format your disk, but don't blame anyone
 except yourself if you lost important files or your system is broken.
 
-Download menhera.sh at https://github.com/Jamesits/menhera.sh
+If you think you've done something wrong, reboot immediately -- there is still hope.
+
+Your original rootfs is at /mnt/oldroot. Be careful dealing with it.
 
 Have a lot of fun...
 EOF
