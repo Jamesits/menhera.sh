@@ -14,7 +14,7 @@ with only SSH!
 
 ## WARNING
 
-> I am not responsible for bricked devices, dead HDDs and SSDs, unreplied tickets, thermonuclear war, or you getting fired because your device is hacked to mine bitcoin. Please do some research if you have any concerns about this script before using it! YOU are choosing to run this script, and if you point the finger at me for messing up your device, I will laugh at you.
+I am not responsible for bricked devices, dead HDDs and SSDs, unreplied tickets, thermonuclear war, or you getting fired because your device is hacked to mine bitcoin. Please do some research if you have any concerns about this script before using it! YOU are choosing to run this script, and if you point the finger at me for messing up your device, I will laugh at you.
 
 ## Dependencies
 
@@ -22,10 +22,15 @@ with only SSH!
   * systemd
   * squashfs-tools
   * curl
+  * ~400MiB RAM in theory
 
 ## Usage
 
-Just run the script, and follow the instructions. 
+  1. Save your work
+  1. Backup all your important files
+  1. Shutdown as many services and programs you can on the victim
+  1. If you use SSH to connect to the server, make sure you can log in directly as root using SSH
+  1. run the script, and follow the instructions
 
 `menhera.sh` will try to download a new rootfs into the memory, replace the old rootfs and kill all processes reading the old rootfs. The old rootfs will be mounted to `/mnt/oldroot`. An example filesystem structure after running `menhera.sh` on my test VPS:
 
