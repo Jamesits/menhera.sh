@@ -86,7 +86,7 @@ copy_config() {
     chroot "${NEWROOT}" chsh -s /bin/bash root
 
     cat > "${NEWROOT}/etc/motd" <<EOF
-NOTICE
+!!!NOTICE!!!
 
 This is a minimal RAM system created by menhera.sh. Feel free to format your disk, but don't blame anyone
 except yourself if you lost important files or your system is broken.
