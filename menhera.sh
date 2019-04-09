@@ -26,7 +26,11 @@ confirm() {
 get_rootfs() {
     if [ -n ${ROOTFS} ]; then 
         echo "Getting rootfs URL..."
+
+        # forgive me for parsing HTML with these shit
+        # and hope it works
         ROOTFS_TIME=$(curl "https://uk.images.linuxcontainers.org/images/debian/stretch/amd64/default/?C=M;O=D" | grep "folder.gif" | head -n 1 | cut -d'>' -f7 | cut -d'/' -f1)
+        
         ROOTFS="https://images.linuxcontainers.org/images/debian/stretch/amd64/default/${ROOTFS_TIME}/rootfs.squashfs"
     else 
         echo "\$ROOTFS is set to '$ROOTFS'"
