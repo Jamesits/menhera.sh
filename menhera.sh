@@ -44,6 +44,8 @@ prepare_environment() {
     modprobe overlay
     modprobe squashfs
 
+    sysctl kernel.panic=10
+
     echo "Creating workspace in '${WORKDIR}'..."
     # workspace
     mkdir -p "${WORKDIR}"
