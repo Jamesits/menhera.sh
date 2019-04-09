@@ -116,12 +116,16 @@ unmount_old_rootfs() {
     umount "${OLDROOT}"
 }
 
-# main procedure
-set +x
+cleanup() {
+    # some cleanup needed after the process quits
+    sleep 1
+    clear_processes
+    unmount_old_rootfs
+}
 
 if [[ $EUID -ne 0 ]]; then
-   echo "This script must be run as root" 
-   exit 1
+    echo "This script must be run as root" 
+    exit 1
 fi
 
 echo -e "We will start a temporary RAM system as your recovery environment."
@@ -131,8 +135,6 @@ echo -e "\tYou have closed all programs you can, and backed up all important dat
 echo -e "\tYou can SSH into your system as root user"
 confirm || exit -1
 
-set -x
-
 sync_filesystem
 
 prepare_environment
@@ -141,15 +143,9 @@ copy_config
 install_software
 swap_root
 
-set +x
-
 echo -e "If you are connecting from SSH, please create a second session to this host and confirm you can get a shell."
 echo -e "After your confirmation, we are going to kill the old SSH server."
 confirm || exit -1
 
-set -x
-
-clear_processes
-unmount_old_rootfs
-
-set +x
+cleanup &
+disown
