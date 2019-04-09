@@ -1,5 +1,5 @@
 #!/bin/bash
-set -Eeuxo pipefail
+set -Eeuo pipefail
 
 # config
 WORKDIR="/tmp/menhera"
@@ -117,6 +117,7 @@ unmount_old_rootfs() {
 }
 
 # main procedure
+set -x
 
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 
@@ -130,6 +131,8 @@ echo -e "\tYou have closed all programs you can, and backed up all important dat
 echo -e "\tYou can SSH into your system as root user"
 confirm || exit -1
 
+set +x
+
 sync_filesystem
 
 prepare_environment
@@ -138,9 +141,13 @@ install_software
 copy_config
 swap_root
 
+set -x
+
 echo -e "If you are connecting from SSH, please create a second session to this host and confirm you can get a shell."
 echo -e "After your confirmation, we are going to kill the old SSH server."
 confirm || exit -1
+
+set +x
 
 clear_processes
 unmount_old_rootfs
