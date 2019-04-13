@@ -160,7 +160,7 @@ clear_processes() {
     echo "Disabling swap..."
     swapoff -a
 
-    echo "Restarting systemd..."
+    echo "Restarting init process..."
     __compat_reload_init
     # hope 15s is enough
     sleep 15
