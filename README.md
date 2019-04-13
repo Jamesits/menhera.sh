@@ -20,6 +20,7 @@ I am not responsible for bricked devices, dead HDDs and SSDs, unreplied tickets,
 
   * Linux kernel: overlayfs and tmpfs support
   * systemd
+  * bash
   * squashfs-tools
   * curl
   * ~400MiB RAM in theory
