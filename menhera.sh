@@ -9,6 +9,30 @@ ROOTFS=""
 OLDROOT="/"
 NEWROOT=""
 
+# environment compatibility
+__compat_restart_ssh() {
+    if [ -x "$(command -v systemctl)" ]; then
+        systemctl restart ssh
+    elif [ -x "$(command -v service)" ]; then
+        service ssh restart
+    else
+        echo "ERROR: Cannot restart SSH server" >&2
+        exit 1
+    fi
+}
+
+__compat_reload_init() {
+    if [ -x "$(command -v systemctl)" ]; then
+        systemctl daemon-reexec
+    elif [ -x "$(command -v telinit)" ]; then
+        telinit u
+    else
+        echo "ERROR: Cannot re-exec init" >&2
+        exit 1
+    fi
+}
+
+# helper functions
 # https://stackoverflow.com/a/3232082/2646069
 confirm() {
     # call with a prompt string or use a default
@@ -23,6 +47,7 @@ confirm() {
     esac
 }
 
+# jobs
 get_rootfs() {
     if [ -n ${ROOTFS} ]; then 
         echo "Getting rootfs URL..."
@@ -128,7 +153,7 @@ swap_root() {
     mount --move "${OLDROOT}/${WORKDIR}" "${WORKDIR}"
 
     echo "Restarting SSH daemon..."
-    systemctl restart ssh
+    __compat_restart_ssh
 }
 
 clear_processes() {
@@ -136,7 +161,8 @@ clear_processes() {
     swapoff -a
 
     echo "Restarting systemd..."
-    telinit u
+    __compat_reload_init
+    # hope 15s is enough
     sleep 15
 
     echo "Killing all programs still using the old root..."
