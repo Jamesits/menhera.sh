@@ -136,7 +136,7 @@ clear_processes() {
     swapoff -a
 
     echo "Restarting systemd..."
-    systemctl daemon-reexec --no-block
+    telinit u
     sleep 15
 
     echo "Killing all programs still using the old root..."
