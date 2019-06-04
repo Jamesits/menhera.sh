@@ -9,6 +9,9 @@ ROOTFS=""
 OLDROOT="/"
 NEWROOT=""
 
+# fix possible PATH problems
+export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 # environment compatibility
 __compat_restart_ssh() {
     if [ -x "$(command -v systemctl)" ]; then
