@@ -106,6 +106,10 @@ mount_new_rootfs() {
 
 install_software() {
     echo "Installing OpenSSH Server into new rootfs..."
+
+    # disable APT cache
+    echo -e 'Dir::Cache "";\nDir::Cache::archives "";' > "${NEWROOT}/etc/apt/apt.conf.d/00_disable-cache-directories"
+
     DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get update -y
     DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y ssh
 }
