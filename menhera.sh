@@ -179,6 +179,21 @@ clear_processes() {
 }
 
 # main procedure
+LIBRARY_ONLY=0
+
+while test $# -gt 0
+do
+    case "$1" in
+        --lib) LIBRARY_ONLY=1
+            ;;
+    esac
+    shift
+done
+
+if [[ $LIBRARY_ONLY -eq 1 ]]; then
+    # acting as a library only
+    exit 0
+fi
 
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root" 
