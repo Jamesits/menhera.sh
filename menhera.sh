@@ -58,9 +58,9 @@ get_rootfs() {
 
         # forgive me for parsing HTML with these shit
         # and hope it works
-        ROOTFS_TIME=$(curl -fsSL "https://images.linuxcontainers.org/images/debian/stretch/amd64/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
+        ROOTFS_TIME=$(curl -fsSL "https://images.linuxcontainers.org/images/debian/buster/amd64/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
         
-        ROOTFS="https://images.linuxcontainers.org/images/debian/stretch/amd64/default/${ROOTFS_TIME}/rootfs.squashfs"
+        ROOTFS="https://images.linuxcontainers.org/images/debian/buster/amd64/default/${ROOTFS_TIME}/rootfs.squashfs"
     else 
         echo "\$ROOTFS is set to '$ROOTFS'"
     fi
