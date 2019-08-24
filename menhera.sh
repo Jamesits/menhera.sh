@@ -15,6 +15,7 @@ export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 # environment compatibility
 __compat_restart_ssh() {
     if [ -x "$(command -v systemctl)" ]; then
+        systemctl daemon-reload
         systemctl restart ssh
     elif [ -x "$(command -v service)" ]; then
         service ssh restart
@@ -111,7 +112,7 @@ install_software() {
     echo -e 'Dir::Cache "";\nDir::Cache::archives "";' > "${NEWROOT}/etc/apt/apt.conf.d/00_disable-cache-directories"
 
     DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get update -y
-    DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y ssh
+    DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y openssh-server
 }
 
 copy_config() {
