@@ -192,7 +192,7 @@ done
 
 if [[ $LIBRARY_ONLY -eq 1 ]]; then
     # acting as a library only
-    exit 0
+    return 0
 fi
 
 if [[ $EUID -ne 0 ]]; then
