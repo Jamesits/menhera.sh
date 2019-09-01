@@ -58,7 +58,7 @@ menhera::get_rootfs() {
 
         # forgive me for parsing HTML with these shit
         # and hope it works
-        ROOTFS_TIME=$(wget -qO- "https://images.linuxcontainers.org/images/debian/buster/amd64/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
+        ROOTFS_TIME=$(wget -qO- --show-progress "https://images.linuxcontainers.org/images/debian/buster/amd64/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
         
         ROOTFS="https://images.linuxcontainers.org/images/debian/buster/amd64/default/${ROOTFS_TIME}/rootfs.squashfs"
     else 
@@ -94,7 +94,7 @@ menhera::prepare_environment() {
     mkdir -p "${WORKDIR}/overlayfs_workdir"
 
     echo "Downloading temporary rootfs..."
-    wget -O "${WORKDIR}/rootfs.squashfs" "${ROOTFS}"
+    wget -q --show-progress -O "${WORKDIR}/rootfs.squashfs" "${ROOTFS}"
 }
 
 menhera::mount_new_rootfs() {
