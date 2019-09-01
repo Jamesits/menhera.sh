@@ -161,7 +161,7 @@ menhera::swap_root() {
     mount --move "${OLDROOT}/${WORKDIR}" "${WORKDIR}"
 
     echo "Restarting SSH daemon..."
-    __compat_restart_ssh
+    menhera::__compat_restart_ssh
 }
 
 menhera::clear_processes() {
@@ -169,7 +169,7 @@ menhera::clear_processes() {
     swapoff -a
 
     echo "Restarting init process..."
-    __compat_reload_init
+    menhera::__compat_reload_init
     # hope 15s is enough
     sleep 15
 
