@@ -82,7 +82,7 @@ menhera::prepare_environment() {
     echo "Creating workspace in '${WORKDIR}'..."
     # workspace
     mkdir -p "${WORKDIR}"
-    mount -t tmpfs tmpfs "${WORKDIR}"
+    mount -t tmpfs -o size=0,nr_blocks=0,nr_inodes=0 tmpfs "${WORKDIR}"
 
     # new rootfs
     mkdir -p "${WORKDIR}/newroot"
