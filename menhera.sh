@@ -205,7 +205,7 @@ echo -e "Note that this script will kill programs and umount filesystems without
 echo -e "Please confirm:"
 echo -e "\tYou have closed all programs you can, and backed up all important data"
 echo -e "\tYou can SSH into your system as root user"
-confirm || exit -1
+menhera::confirm || exit -1
 
 menhera::get_rootfs
 menhera::sync_filesystem
@@ -220,7 +220,7 @@ echo -e "If you are connecting from SSH, please create a second session to this 
 echo -e "confirm you can get a shell."
 echo -e "After your confirmation, we are going to kill the old SSH server."
 
-if confirm; then 
+if menhera::confirm; then 
     menhera::clear_processes
 else
     echo -e "Please manually issue a reboot to recover your old OS. If you believe there is a bug in menhera.sh, "
