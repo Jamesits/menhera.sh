@@ -82,7 +82,7 @@ menhera::prepare_environment() {
     echo "Creating workspace in '${WORKDIR}'..."
     # workspace
     mkdir -p "${WORKDIR}"
-    mount -t tmpfs -o size=0,nr_blocks=0,nr_inodes=0 tmpfs "${WORKDIR}"
+    mount -t tmpfs -o size=100% tmpfs "${WORKDIR}"
 
     # new rootfs
     mkdir -p "${WORKDIR}/newroot"
@@ -155,7 +155,7 @@ menhera::swap_root() {
 
     # move mounts
     for i in dev proc sys run; do mount --move "${OLDROOT}/$i" "${NEWROOT}/$i"; done
-    mount -t tmpfs -o size=0,nr_blocks=0,nr_inodes=0 tmpfs "${NEWROOT}/tmp"
+    mount -t tmpfs -o size=100% tmpfs "${NEWROOT}/tmp"
 
     mkdir -p "${WORKDIR}"
     mount --move "${OLDROOT}/${WORKDIR}" "${WORKDIR}"
