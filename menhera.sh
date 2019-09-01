@@ -13,7 +13,7 @@ NEWROOT=""
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # environment compatibility
-__compat_restart_ssh() {
+menhera::__compat_restart_ssh() {
     if [ -x "$(command -v systemctl)" ]; then
         systemctl daemon-reload
         systemctl restart ssh
@@ -25,7 +25,7 @@ __compat_restart_ssh() {
     fi
 }
 
-__compat_reload_init() {
+menhera::__compat_reload_init() {
     if [ -x "$(command -v systemctl)" ]; then
         systemctl daemon-reexec
     elif [ -x "$(command -v telinit)" ]; then
@@ -38,7 +38,7 @@ __compat_reload_init() {
 
 # helper functions
 # https://stackoverflow.com/a/3232082/2646069
-confirm() {
+menhera::confirm() {
     # call with a prompt string or use a default
     read -r -p "${1:-Are you sure? [y/N]} " response
     case "$response" in
@@ -52,7 +52,7 @@ confirm() {
 }
 
 # jobs
-get_rootfs() {
+menhera::get_rootfs() {
     if [ -n ${ROOTFS} ]; then 
         echo "Getting rootfs URL..."
 
@@ -66,13 +66,13 @@ get_rootfs() {
     fi
 }
 
-sync_filesystem() {
+menhera::sync_filesystem() {
     echo "Syncing..."
     sync
     sync
 }
 
-prepare_environment() {
+menhera::prepare_environment() {
     echo "Loading kernel modules..."
     modprobe overlay
     modprobe squashfs
@@ -97,7 +97,7 @@ prepare_environment() {
     curl -L -C - -o "${WORKDIR}/rootfs.squashfs" "${ROOTFS}"
 }
 
-mount_new_rootfs() {
+menhera::mount_new_rootfs() {
     echo "Mounting temporary rootfs..."
     mount -t squashfs "${WORKDIR}/rootfs.squashfs" "${WORKDIR}/newrootro"
     mount -t overlay overlay -o rw,lowerdir="${WORKDIR}/newrootro",upperdir="${WORKDIR}/newrootrw",workdir="${WORKDIR}/overlayfs_workdir" "${WORKDIR}/newroot"
@@ -105,7 +105,7 @@ mount_new_rootfs() {
     NEWROOT="${WORKDIR}/newroot"
 }
 
-install_software() {
+menhera::install_software() {
     echo "Installing OpenSSH Server into new rootfs..."
 
     # disable APT cache
@@ -115,7 +115,7 @@ install_software() {
     DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y openssh-server
 }
 
-copy_config() {
+menhera::copy_config() {
     echo "Copying important config into new rootfs..."
     ! cp -ax "${OLDROOT}/etc/resolv.conf" "${NEWROOT}/etc"
     ! cp -axr "${OLDROOT}/etc/ssh" "${NEWROOT}/etc"
@@ -141,7 +141,7 @@ Have a lot of fun...
 EOF
 }
 
-swap_root() {
+menhera::swap_root() {
     echo "Swapping rootfs..."
     # prepare future mount point for our old rootfs
     mkdir -p "${WORKDIR}/newroot/mnt/oldroot"
@@ -164,7 +164,7 @@ swap_root() {
     __compat_restart_ssh
 }
 
-clear_processes() {
+menhera::clear_processes() {
     echo "Disabling swap..."
     swapoff -a
 
@@ -207,21 +207,21 @@ echo -e "\tYou have closed all programs you can, and backed up all important dat
 echo -e "\tYou can SSH into your system as root user"
 confirm || exit -1
 
-get_rootfs
-sync_filesystem
+menhera::get_rootfs
+menhera::sync_filesystem
 
-prepare_environment
-mount_new_rootfs
-copy_config
-install_software
-swap_root
+menhera::prepare_environment
+menhera::mount_new_rootfs
+menhera::copy_config
+menhera::install_software
+menhera::swap_root
 
 echo -e "If you are connecting from SSH, please create a second session to this host use root and"
 echo -e "confirm you can get a shell."
 echo -e "After your confirmation, we are going to kill the old SSH server."
 
 if confirm; then 
-    clear_processes
+    menhera::clear_processes
 else
     echo -e "Please manually issue a reboot to recover your old OS. If you believe there is a bug in menhera.sh, "
     echo -e "raise a ticket at https://github.com/Jamesits/menhera.sh/issues ."
