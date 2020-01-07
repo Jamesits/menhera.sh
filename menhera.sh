@@ -12,15 +12,36 @@ NEWROOT=""
 # fix possible PATH problems
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
+menhera::reset_sshd_config() {
+    cat > /etc/ssh/sshd_config <<EOF
+PermitRootLogin yes
+AcceptEnv LANG LC_*
+EOF
+}
+
 # environment compatibility
 menhera::__compat_restart_ssh() {
     if [ -x "$(command -v systemctl)" ]; then
         systemctl daemon-reload
-        systemctl restart ssh
+        if ! systemctl restart ssh; then
+            echo "SSH daemon start failed, try resetting config..."
+            menhera::reset_sshd_config
+            if ! systemctl restart ssh; then
+                echo "SSH daemon fail to start, dropping you to a shell..."
+                sh
+            fi
+        fi
     elif [ -x "$(command -v service)" ]; then
-        service ssh restart
+        if ! service ssh restart; then
+            echo "SSH daemon start failed, try resetting config..."
+            menhera::reset_sshd_config
+            if ! service ssh restart; then
+                echo "SSH daemon fail to start, dropping you to a shell..."
+                sh
+            fi
+        fi
     else
-        echo "ERROR: Cannot restart SSH server" >&2
+        echo "ERROR: Cannot restart SSH server, init system not recoginzed" >&2
         exit 1
     fi
 }
@@ -31,7 +52,7 @@ menhera::__compat_reload_init() {
     elif [ -x "$(command -v telinit)" ]; then
         telinit u
     else
-        echo "ERROR: Cannot re-exec init" >&2
+        echo "ERROR: Cannot re-exec init, init system not recoginzed" >&2
         exit 1
     fi
 }
