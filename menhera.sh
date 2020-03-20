@@ -1,5 +1,7 @@
 #!/bin/bash
 set -Eeuo pipefail
+# disable command path hashing as we are going to move fast and break things
+set +h
 
 # config
 WORKDIR="/tmp/menhera"
