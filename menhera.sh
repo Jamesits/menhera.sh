@@ -175,7 +175,11 @@ menhera::swap_root() {
     NEWROOT="/"
 
     # move mounts
-    for i in dev proc sys run; do mount --move "${OLDROOT}/$i" "${NEWROOT}/$i"; done
+    for i in dev proc sys run; do
+        if [ -d "${OLDROOT}/$i" ]; then
+            mount --move "${OLDROOT}/$i" "${NEWROOT}/$i"
+        fi
+    done
     mount -t tmpfs -o size=100% tmpfs "${NEWROOT}/tmp"
 
     mkdir -p "${WORKDIR}"
