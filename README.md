@@ -30,7 +30,7 @@ I am not responsible for bricked devices, dead HDDs and SSDs, unreplied tickets,
   1. Save your work
   1. Backup all your important files
   1. Shutdown as many services and programs you can on the victim
-  1. If you use SSH to connect to the server, make sure you can log in directly as root using SSH
+  1. If you use SSH to connect to the server, make sure you can log in directly as root using SSH with a password
   1. run the script, and follow the instructions
 
 `menhera.sh` will try to download a new rootfs into the memory, replace the old rootfs and kill all processes accessing the old rootfs. The old rootfs will be mounted to `/mnt/oldroot`. An simplified example filesystem structure after running `menhera.sh` on my test VPS:
