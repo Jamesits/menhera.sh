@@ -7,11 +7,18 @@ set +h
 WORKDIR="/tmp/menhera"
 ROOTFS=""
 
+declare -A ARCH_MAP=(
+    ["x86_64"]="amd64"
+)
+
 # internal global variables
 OLDROOT="/"
 NEWROOT=""
 
-# fix possible PATH problems
+MACHINE_TYPE=$(uname -m)
+ARCH_ID=${ARCH_MAP[$MACHINE_TYPE]:-$MACHINE_TYPE}
+
+# fix possible PATH pMYMAP[missing]+_roblems
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 menhera::reset_sshd_config() {
@@ -81,9 +88,9 @@ menhera::get_rootfs() {
 
         # forgive me for parsing HTML with these shit
         # and hope it works
-        ROOTFS_TIME=$(wget -qO- --show-progress "https://images.linuxcontainers.org/images/debian/buster/amd64/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
+        ROOTFS_TIME=$(wget -qO- --show-progress "https://images.linuxcontainers.org/images/debian/buster/${ARCH_ID}/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
         
-        ROOTFS="https://images.linuxcontainers.org/images/debian/buster/amd64/default/${ROOTFS_TIME}/rootfs.squashfs"
+        ROOTFS="https://images.linuxcontainers.org/images/debian/buster/${ARCH_ID}/default/${ROOTFS_TIME}/rootfs.squashfs"
     else 
         echo "\$ROOTFS is set to '$ROOTFS'"
     fi
