@@ -61,7 +61,7 @@ menhera::__compat_reload_init() {
     elif [ -x "$(command -v telinit)" ]; then
         telinit u
     else
-        echo "ERROR: Cannot re-exec init, init system not recoginzed" >&2
+        echo "ERROR: Cannot re-exec init, init system not recognized" >&2
         exit 1
     fi
 }
