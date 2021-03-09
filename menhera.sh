@@ -18,7 +18,7 @@ NEWROOT=""
 MACHINE_TYPE=$(uname -m)
 ARCH_ID=${ARCH_MAP[$MACHINE_TYPE]:-$MACHINE_TYPE}
 
-# fix possible PATH pMYMAP[missing]+_roblems
+# fix possible PATH problems
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 menhera::reset_sshd_config() {
