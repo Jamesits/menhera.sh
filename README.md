@@ -52,5 +52,5 @@ TARGET                                SOURCE     FSTYPE     OPTIONS
 ## Thanks
 
   * This project is inspired by [marcan/takeover.sh](https://github.com/marcan/takeover.sh)
-  * The major code came from [a maintenance writeup on my blog](https://blog.swineson.me/debian-9-csm-online-convert-root-partition-to-raid/) (in Simp. Chinese)
+  * The major code came from [a maintenance writeup on my blog](https://blog.swineson.me/zh/debian-9-csm-online-convert-root-partition-to-raid/) (in Simp. Chinese)
   * [xTom.com](https://xtom.com/) donated a VPS for my testing
