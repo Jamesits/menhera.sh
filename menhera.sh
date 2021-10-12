@@ -191,8 +191,8 @@ except yourself if you lost important files or your system is broken.
 
 If you think you've done something wrong, reboot immediately -- there is still hope.
 
-Your original rootfs is at \"/mnt/oldroot\". Be careful dealing with it. If it is still occupied, 
-run \"fuser -kvm -15 /mnt/oldroot\" to kill them.
+Your original rootfs is at "/mnt/oldroot". Be careful dealing with it. If it is still occupied, 
+run "fuser -kvm -15 /mnt/oldroot" to kill them.
 
 Have a lot of fun...
 EOF
@@ -264,8 +264,8 @@ fi
 echo -e "We will start a temporary RAM system as your recovery environment."
 echo -e "Note that this script will kill programs and umount filesystems without prompting."
 echo -e "Please confirm:"
-echo -e "\tYou have closed all programs you can, and backed up all important data"
-echo -e "\tYou can SSH into your system as root user"
+echo -e "\t+ You have closed all programs you can, and backed up all important data"
+echo -e "\t+ You can SSH into your system as root user"
 menhera::confirm || exit -1
 
 menhera::get_rootfs
