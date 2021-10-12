@@ -52,7 +52,7 @@ menhera::__compat_restart_ssh() {
             fi
         fi
     else
-        echo "ERROR: Cannot restart SSH server, init system not recoginzed" >&2
+        >&2 echo "ERROR: Cannot restart SSH server, init system not recoginzed"
         exit 1
     fi
 }
@@ -63,8 +63,32 @@ menhera::__compat_reload_init() {
     elif [ -x "$(command -v telinit)" ]; then
         telinit u
     else
-        echo "ERROR: Cannot re-exec init, init system not recognized" >&2
+        >&2 echo "ERROR: Cannot re-exec init, init system not recognized"
         exit 1
+    fi
+}
+
+# fetch URL and output its body to stdout
+menhera::__compat_download_stdout() {
+    if command -v wget > /dev/null; then
+        wget -qO- --show-progress "$1"
+    elif command -v curl > /dev/null; then
+        curl "$1"
+    else
+        >&2 echo "ERROR: No compatible download program is installed, try install curl or wget"
+	return 127
+    fi
+}
+
+# fetch URL and put the content to a file
+menhera::__compat_download_file() {
+    if command -v wget > /dev/null; then
+        wget -q --show-progress -O "$2" "$1"
+    elif command -v curl > /dev/null; then
+        curl -o "$2" "$1"
+    else
+        >&2 echo "ERROR: No compatible download program is installed, try install curl or wget"
+        return 127
     fi
 }
 
@@ -90,7 +114,7 @@ menhera::get_rootfs() {
 
         # forgive me for parsing HTML with these shit
         # and hope it works
-        ROOTFS_TIME=$(wget -qO- --show-progress "https://images.linuxcontainers.org/images/${TEMP_ROOTFS_DISTRO}/${TEMP_ROOTFS_FLAVOR}/${ARCH_ID}/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
+        ROOTFS_TIME=$(menhera::__compat_download_stdout "https://images.linuxcontainers.org/images/${TEMP_ROOTFS_DISTRO}/${TEMP_ROOTFS_FLAVOR}/${ARCH_ID}/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
         
         ROOTFS="https://images.linuxcontainers.org/images/${TEMP_ROOTFS_DISTRO}/${TEMP_ROOTFS_FLAVOR}/${ARCH_ID}/default/${ROOTFS_TIME}/rootfs.squashfs"
     else 
@@ -126,7 +150,7 @@ menhera::prepare_environment() {
     mkdir -p "${WORKDIR}/overlayfs_workdir"
 
     echo "Downloading temporary rootfs..."
-    wget -q --show-progress -O "${WORKDIR}/rootfs.squashfs" "${ROOTFS}"
+    menhera::__compat_download_file "${ROOTFS}" "${WORKDIR}/rootfs.squashfs"
 }
 
 menhera::mount_new_rootfs() {
