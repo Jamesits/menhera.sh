@@ -191,7 +191,8 @@ except yourself if you lost important files or your system is broken.
 
 If you think you've done something wrong, reboot immediately -- there is still hope.
 
-Your original rootfs is at /mnt/oldroot. Be careful dealing with it.
+Your original rootfs is at \"/mnt/oldroot\". Be careful dealing with it. If it is still occupied, 
+run \"fuser -kvm -15 /mnt/oldroot\" to kill them.
 
 Have a lot of fun...
 EOF
@@ -233,7 +234,7 @@ menhera::clear_processes() {
     # hope 15s is enough
     sleep 15
 
-    echo "Killing all programs still using the old root..."
+    echo "Killing all programs still using the old root... Goodbye! See you on the other side~"
     fuser -kvm "${OLDROOT}" -15
     # in most cases the parent process of this script will be killed, so goodbye
 }
@@ -256,7 +257,7 @@ if [[ $LIBRARY_ONLY -eq 1 ]]; then
 fi
 
 if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run as root" 
+    >&2 echo "This script must be run as root" 
     exit 1
 fi
 
