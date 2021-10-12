@@ -22,7 +22,7 @@ I am not responsible for bricked devices, dead HDDs and SSDs, unreplied tickets,
   * systemd
   * bash
   * squashfs-tools
-  * curl
+  * curl or wget
   * ~400MiB RAM in theory
 
 ## Usage
@@ -30,7 +30,7 @@ I am not responsible for bricked devices, dead HDDs and SSDs, unreplied tickets,
   1. Save your work
   1. Backup all your important files
   1. Shutdown as many services and programs you can on the victim
-  1. If you use SSH to connect to the server, make sure you can log in directly as root using SSH with a password
+  1. If you use SSH to connect to the server, make sure you can log in directly as root using SSH with a password (You need to set a password for root!)
   1. run the script, and follow the instructions
 
 `menhera.sh` will try to download a new rootfs into the memory, replace the old rootfs and kill all processes accessing the old rootfs. The old rootfs will be mounted to `/mnt/oldroot`. An simplified example filesystem structure after running `menhera.sh` on my test VPS:
@@ -54,3 +54,4 @@ TARGET                                SOURCE     FSTYPE     OPTIONS
   * This project is inspired by [marcan/takeover.sh](https://github.com/marcan/takeover.sh)
   * The major code came from [a maintenance writeup on my blog](https://blog.swineson.me/zh/debian-9-csm-online-convert-root-partition-to-raid/) (in Simp. Chinese)
   * [xTom.com](https://xtom.com/) donated a VPS for my testing
+
