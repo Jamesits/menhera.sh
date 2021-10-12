@@ -192,7 +192,7 @@ except yourself if you lost important files or your system is broken.
 If you think you've done something wrong, reboot immediately -- there is still hope.
 
 Your original rootfs is at "/mnt/oldroot". Be careful dealing with it. If it is still occupied, 
-run "fuser -kvm -15 /mnt/oldroot" to kill them.
+run "fuser -kvm /mnt/oldroot; fuser -kvm -15 /mnt/oldroot" to kill them.
 
 Have a lot of fun...
 EOF
