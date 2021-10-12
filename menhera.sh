@@ -4,6 +4,8 @@ set -Eeuo pipefail
 set +h
 
 # config
+TEMP_ROOTFS_DISTRO="debian"
+TEMP_ROOTFS_FLAVOR="bullseye"
 WORKDIR="/tmp/menhera"
 ROOTFS=""
 
@@ -88,9 +90,9 @@ menhera::get_rootfs() {
 
         # forgive me for parsing HTML with these shit
         # and hope it works
-        ROOTFS_TIME=$(wget -qO- --show-progress "https://images.linuxcontainers.org/images/debian/buster/${ARCH_ID}/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
+        ROOTFS_TIME=$(wget -qO- --show-progress "https://images.linuxcontainers.org/images/${TEMP_ROOTFS_DISTRO}/${TEMP_ROOTFS_FLAVOR}/${ARCH_ID}/default/?C=M;O=D" | grep -oP '(\d{8}_\d{2}:\d{2})' | head -n 1)
         
-        ROOTFS="https://images.linuxcontainers.org/images/debian/buster/${ARCH_ID}/default/${ROOTFS_TIME}/rootfs.squashfs"
+        ROOTFS="https://images.linuxcontainers.org/images/${TEMP_ROOTFS_DISTRO}/${TEMP_ROOTFS_FLAVOR}/${ARCH_ID}/default/${ROOTFS_TIME}/rootfs.squashfs"
     else 
         echo "\$ROOTFS is set to '$ROOTFS'"
     fi
