@@ -182,12 +182,18 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/sbin/dropbear -r /etc/ssh/ssh_host_ed25519_key -r /etc/ssh/ssh_host_rsa_key -R -F -E -m -K 30
+ExecStart=/usr/sbin/dropbear -R -F -E -m -K 30
 
 [Install]
 WantedBy=multi-user.target
 
 EOF
+
+    # convert dropbear key format
+    ! dropbearconvert openssh dropbear /etc/ssh/ssh_host_rsa_key /etc/dropbear/dropbear_rsa_host_key
+    ! dropbearconvert openssh dropbear /etc/ssh/ssh_host_dss_key /etc/dropbear/dropbear_dss_host_key
+    ! dropbearconvert openssh dropbear /etc/ssh/ssh_host_ecdsa_key /etc/dropbear/dropbear_ecdsa_host_key
+    ! dropbearconvert openssh dropbear /etc/ssh/ssh_host_ed25519_key /etc/dropbear/dropbear_ed25519_host_key
     fi
 }
 
