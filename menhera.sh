@@ -38,7 +38,7 @@ menhera::__compat_restart_ssh() {
 
         if [ "${SSHD}" = "openssh" ]; then
             ! systemctl enable ssh
-            systemctl reset-failed ssh
+            ! systemctl reset-failed ssh
             if ! systemctl restart ssh; then
                 >&2 echo "[-] SSH daemon start failed, try resetting config..."
                 menhera::reset_sshd_config
@@ -49,8 +49,11 @@ menhera::__compat_restart_ssh() {
             fi
         elif [ "${SSHD}" = "dropbear" ]; then
             ! systemctl enable dropbear
-            systemctl reset-failed dropbear
-            systemctl restart dropbear
+            ! systemctl reset-failed dropbear
+            if ! systemctl restart dropbear; then
+                >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
+                sh
+            fi
         fi
     else
         >&2 echo "[-] ERROR: Cannot restart SSH server, init system not recoginzed"
