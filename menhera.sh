@@ -46,7 +46,7 @@ menhera::__compat_restart_ssh() {
                 >&2 echo "[-] SSH daemon start failed, try resetting config..."
                 menhera::reset_sshd_config
                 if ! systemctl restart ssh; then
-                    >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
+                    >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually launch a forking SSH daemon and exit."
                     sh
                 fi
             fi
@@ -55,7 +55,7 @@ menhera::__compat_restart_ssh() {
             # This is due to newer version of systemd trying to read executables from the old rootfs
             # thus failing with exit status 203. (Observed on CentOS 8 Stream.)
             if ! dropbear -E -m -K 10; then
-                >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
+                >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually launch a forking SSH daemon and exit."
                 sh
             fi
         fi
@@ -64,14 +64,17 @@ menhera::__compat_restart_ssh() {
         return 1
     fi
 
+    >&2 echo "[+] SSH daemon started"
     return 0
 }
 
 menhera::__compat_reload_init() {
     if [ -x "$(command -v systemctl)" ]; then
         systemctl daemon-reexec
+        >&2 echo "[+] Reloaded SystemD"
     elif [ -x "$(command -v telinit)" ]; then
         telinit u
+        >&2 echo "[+] Reloaded init"
     else
         >&2 echo "[-] ERROR: Cannot re-exec init, init system not recognized"
         return 1
@@ -198,7 +201,7 @@ menhera::install_software() {
     elif [ "${SSHD}" = "dropbear" ]; then
         DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dropbear-bin
 
-        # convert dropbear key format
+        # convert dropbear key format (if possible; only ed25519 is known to work)
         mkdir -p "${NEWROOT}/etc/dropbear"
         ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_rsa_key" "/etc/dropbear/dropbear_rsa_host_key"
         ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_dsa_key" "/etc/dropbear/dropbear_dss_host_key"
@@ -216,6 +219,7 @@ menhera::copy_config() {
     ! cp -ax "${OLDROOT}/etc/"{passwd,shadow} "${NEWROOT}/etc"
     ! cp -axr "${OLDROOT}/root/.ssh" "${NEWROOT}/root"
 
+    # fix SSH key files permission; otherwise OpenSSH server will refuse to start
     mkdir -p "${NEWROOT}/etc/ssh"
     ! chmod 600 -- "${NEWROOT}/etc/ssh/"*_key
     ! chown -R root:root -- "${NEWROOT}/root/.ssh"
@@ -232,10 +236,11 @@ Download menhera.sh at https://github.com/Jamesits/menhera.sh
 This is a minimal RAM system created by menhera.sh. Feel free to format your disk, but don't blame anyone
 except yourself if you lost important files or your system is broken.
 
-If you think you've done something wrong, reboot immediately -- there is still hope.
+If you think you've done something wrong, reboot immediately -- there is still hope. If unable to reboot using normal
+commands, try "echo b > /proc/sysrq-trigger".
 
 Your original rootfs is at "/mnt/oldroot". Be careful dealing with it. If it is still occupied, 
-run "fuser -kvm /mnt/oldroot; fuser -kvm -15 /mnt/oldroot" to kill them.
+run "fuser -kvm /mnt/oldroot; fuser -kvm -15 /mnt/oldroot" to kill processes using the old rootfs.
 
 Have a lot of fun...
 EOF
@@ -251,7 +256,7 @@ menhera::swap_root() {
 
     # swap root
     pivot_root "${WORKDIR}/newroot" "${WORKDIR}/newroot/mnt/oldroot"
-
+    >&2 echo "[+] Rootfs replaced"
     OLDROOT="/mnt/oldroot"
     NEWROOT="/"
 
@@ -327,7 +332,8 @@ menhera::install_software
 menhera::swap_root
 
 echo -e "If you are connecting from SSH, please create a second session to this host use root and"
-echo -e "confirm you can get a shell."
+echo -e "confirm you can get a shell. Host key might change - use \"ssh-keygen -R hostname-or-ip\" to purge the"
+echo -e "host key cache entry."
 echo -e "After your confirmation, we are going to kill the old SSH server."
 
 if menhera::confirm; then 
