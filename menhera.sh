@@ -134,6 +134,7 @@ menhera::prepare_environment() {
     modprobe squashfs
 
     sysctl kernel.panic=10
+    sysctl kernel.sysrq=1
 
     >&2 echo "[*] Creating workspace in '${WORKDIR}'..."
     # workspace
