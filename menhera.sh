@@ -35,24 +35,24 @@ menhera::__compat_restart_ssh() {
     if [ -x "$(command -v systemctl)" ]; then
         systemctl daemon-reload
         if ! systemctl restart ssh; then
-            echo "SSH daemon start failed, try resetting config..."
+            >&2 echo "[-] SSH daemon start failed, try resetting config..."
             menhera::reset_sshd_config
             if ! systemctl restart ssh; then
-                echo "SSH daemon fail to start, dropping you to a shell..."
+                >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
                 sh
             fi
         fi
     elif [ -x "$(command -v service)" ]; then
         if ! service ssh restart; then
-            echo "SSH daemon start failed, try resetting config..."
+            >&2 echo "[-] SSH daemon start failed, try resetting config..."
             menhera::reset_sshd_config
             if ! service ssh restart; then
-                echo "SSH daemon fail to start, dropping you to a shell..."
+                >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
                 sh
             fi
         fi
     else
-        >&2 echo "ERROR: Cannot restart SSH server, init system not recoginzed"
+        >&2 echo "[-] ERROR: Cannot restart SSH server, init system not recoginzed"
         exit 1
     fi
 }
@@ -63,7 +63,7 @@ menhera::__compat_reload_init() {
     elif [ -x "$(command -v telinit)" ]; then
         telinit u
     else
-        >&2 echo "ERROR: Cannot re-exec init, init system not recognized"
+        >&2 echo "[-] ERROR: Cannot re-exec init, init system not recognized"
         exit 1
     fi
 }
@@ -75,7 +75,7 @@ menhera::__compat_download_stdout() {
     elif command -v curl > /dev/null; then
         curl "$1"
     else
-        >&2 echo "ERROR: No compatible download program is installed, try install curl or wget"
+        >&2 echo "[-] ERROR: No compatible download program is installed, try install curl or wget"
 	return 127
     fi
 }
@@ -87,7 +87,7 @@ menhera::__compat_download_file() {
     elif command -v curl > /dev/null; then
         curl -o "$2" "$1"
     else
-        >&2 echo "ERROR: No compatible download program is installed, try install curl or wget"
+        >&2 echo "[-] ERROR: No compatible download program is installed, try install curl or wget"
         return 127
     fi
 }
@@ -110,7 +110,7 @@ menhera::confirm() {
 # jobs
 menhera::get_rootfs() {
     if [ -n ${ROOTFS} ]; then 
-        echo "Getting rootfs URL..."
+        >&2 echo "[*] Getting rootfs URL..."
 
         # forgive me for parsing HTML with these shit
         # and hope it works
@@ -118,24 +118,24 @@ menhera::get_rootfs() {
         
         ROOTFS="https://images.linuxcontainers.org/images/${TEMP_ROOTFS_DISTRO}/${TEMP_ROOTFS_FLAVOR}/${ARCH_ID}/default/${ROOTFS_TIME}/rootfs.squashfs"
     else 
-        echo "\$ROOTFS is set to '$ROOTFS'"
+        >&2 echo "[+] \$ROOTFS is set to '$ROOTFS'"
     fi
 }
 
 menhera::sync_filesystem() {
-    echo "Syncing..."
+    >&2 echo "[*] Syncing..."
     sync
     sync
 }
 
 menhera::prepare_environment() {
-    echo "Loading kernel modules..."
+    >&2 echo "[*] Loading kernel modules..."
     modprobe overlay
     modprobe squashfs
 
     sysctl kernel.panic=10
 
-    echo "Creating workspace in '${WORKDIR}'..."
+    >&2 echo "[*] Creating workspace in '${WORKDIR}'..."
     # workspace
     mkdir -p "${WORKDIR}"
     mount -t tmpfs -o size=100% tmpfs "${WORKDIR}"
@@ -149,12 +149,12 @@ menhera::prepare_environment() {
     # overlayfs workdir
     mkdir -p "${WORKDIR}/overlayfs_workdir"
 
-    echo "Downloading temporary rootfs..."
+    >&2 echo "[*] Downloading temporary rootfs..."
     menhera::__compat_download_file "${ROOTFS}" "${WORKDIR}/rootfs.squashfs"
 }
 
 menhera::mount_new_rootfs() {
-    echo "Mounting temporary rootfs..."
+    >&2 echo "[*] Mounting temporary rootfs..."
     mount -t squashfs "${WORKDIR}/rootfs.squashfs" "${WORKDIR}/newrootro"
     mount -t overlay overlay -o rw,lowerdir="${WORKDIR}/newrootro",upperdir="${WORKDIR}/newrootrw",workdir="${WORKDIR}/overlayfs_workdir" "${WORKDIR}/newroot"
 
@@ -162,7 +162,7 @@ menhera::mount_new_rootfs() {
 }
 
 menhera::install_software() {
-    echo "Installing OpenSSH Server into new rootfs..."
+    >&2 echo "[*] Installing OpenSSH Server into new rootfs..."
 
     # disable APT cache
     echo -e 'Dir::Cache "";\nDir::Cache::archives "";' > "${NEWROOT}/etc/apt/apt.conf.d/00_disable-cache-directories"
@@ -172,11 +172,15 @@ menhera::install_software() {
 }
 
 menhera::copy_config() {
-    echo "Copying important config into new rootfs..."
+    >&2 echo "[*] Copying important config into new rootfs..."
     ! cp -axL --remove-destination "${OLDROOT}/etc/resolv.conf" "${NEWROOT}/etc"
     ! cp -axr "${OLDROOT}/etc/ssh" "${NEWROOT}/etc"
     ! cp -ax "${OLDROOT}/etc/"{passwd,shadow} "${NEWROOT}/etc"
     ! cp -axr "${OLDROOT}/root/.ssh" "${NEWROOT}/root"
+
+    ! chmod 600 -- "${NEWROOT}/etc/ssh/"*_key
+    ! chown -R root:root -- "${NEWROOT}/root/.ssh"
+    ! find "${NEWROOT}/root/.ssh" -type f -exec chmod 600 -- {} +
 
     chroot "${NEWROOT}" chsh -s /bin/bash root
 
@@ -199,7 +203,7 @@ EOF
 }
 
 menhera::swap_root() {
-    echo "Swapping rootfs..."
+    >&2 echo "[*] Swapping rootfs..."
     # prepare future mount point for our old rootfs
     mkdir -p "${WORKDIR}/newroot/mnt/oldroot"
     mount --make-rprivate /
@@ -221,20 +225,20 @@ menhera::swap_root() {
     mkdir -p "${WORKDIR}"
     mount --move "${OLDROOT}/${WORKDIR}" "${WORKDIR}"
 
-    echo "Restarting SSH daemon..."
+    >&2 echo "[*] Restarting SSH daemon..."
     menhera::__compat_restart_ssh
 }
 
 menhera::clear_processes() {
-    echo "Disabling swap..."
+    >&2 echo "[*] Disabling swap..."
     swapoff -a
 
-    echo "Restarting init process..."
+    >&2 echo "[*] Restarting init process..."
     menhera::__compat_reload_init
     # hope 15s is enough
     sleep 15
 
-    echo "Killing all programs still using the old root... Goodbye! See you on the other side~"
+    >&2 echo "[*] Killing all programs still using the old root... Goodbye! See you on the other side~"
     fuser -kvm "${OLDROOT}" -15
     # in most cases the parent process of this script will be killed, so goodbye
 }
@@ -257,7 +261,7 @@ if [[ $LIBRARY_ONLY -eq 1 ]]; then
 fi
 
 if [[ $EUID -ne 0 ]]; then
-    >&2 echo "This script must be run as root"
+    >&2 echo "[-] This script must be run as root"
     exit 1
 fi
 
