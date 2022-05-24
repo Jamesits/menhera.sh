@@ -173,7 +173,7 @@ menhera::install_software() {
 
 menhera::copy_config() {
     echo "Copying important config into new rootfs..."
-    ! cp -axL "${OLDROOT}/etc/resolv.conf" "${NEWROOT}/etc"
+    ! cp -axL --remove-destination "${OLDROOT}/etc/resolv.conf" "${NEWROOT}/etc"
     ! cp -axr "${OLDROOT}/etc/ssh" "${NEWROOT}/etc"
     ! cp -ax "${OLDROOT}/etc/"{passwd,shadow} "${NEWROOT}/etc"
     ! cp -axr "${OLDROOT}/root/.ssh" "${NEWROOT}/root"
