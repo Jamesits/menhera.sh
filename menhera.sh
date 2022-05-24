@@ -53,7 +53,7 @@ menhera::__compat_restart_ssh() {
             # Don't rely on systemd anymore; use daemon fork instead.
             # This is due to newer version of systemd trying to read executables from the old rootfs
             # thus failing with exit status 203. (Observed on CentOS 8 Stream.)
-            if ! dropbear -R -E -m -K 10; then
+            if ! dropbear -E -m -K 10; then
                 >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
                 sh
             fi
