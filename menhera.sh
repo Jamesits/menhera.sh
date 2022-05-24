@@ -34,7 +34,9 @@ EOF
 # environment compatibility
 menhera::__compat_restart_ssh() {
     if [ -x "$(command -v systemctl)" ]; then
-        systemctl daemon-reload
+        ! systemctl daemon-reload
+        ! systemctl stop ssh
+        ! systemctl stop sshd # RPM distro compatiblity
 
         if [ "${SSHD}" = "openssh" ]; then
             ! systemctl enable ssh
@@ -48,9 +50,10 @@ menhera::__compat_restart_ssh() {
                 fi
             fi
         elif [ "${SSHD}" = "dropbear" ]; then
-            ! systemctl enable dropbear
-            ! systemctl reset-failed dropbear
-            if ! systemctl restart dropbear; then
+            # Don't rely on systemd anymore; use daemon fork instead.
+            # This is due to newer version of systemd trying to read executables from the old rootfs
+            # thus failing with exit status 203. (Observed on CentOS 8 Stream.)
+            if ! dropbear -R -E -m -K 10; then
                 >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
                 sh
             fi
@@ -178,25 +181,12 @@ menhera::install_software() {
     elif [ "${SSHD}" = "dropbear" ]; then
         DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dropbear-bin
 
-        cat > "${NEWROOT}/etc/systemd/system/dropbear.service" <<EOF
-[Unit]
-Description=Dropbear SSH Server
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/sbin/dropbear -R -F -E -m -K 30
-
-[Install]
-WantedBy=multi-user.target
-
-EOF
-
-    # convert dropbear key format
-    ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_rsa_key" "/etc/dropbear/dropbear_rsa_host_key"
-    ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_dsa_key" "/etc/dropbear/dropbear_dss_host_key"
-    ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_ecdsa_key" "/etc/dropbear/dropbear_ecdsa_host_key"
-    ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_ed25519_key" "/etc/dropbear/dropbear_ed25519_host_key"
+        # convert dropbear key format
+        mkdir -p "${NEWROOT}/etc/dropbear"
+        ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_rsa_key" "/etc/dropbear/dropbear_rsa_host_key"
+        ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_dsa_key" "/etc/dropbear/dropbear_dss_host_key"
+        ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_ecdsa_key" "/etc/dropbear/dropbear_ecdsa_host_key"
+        ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_ed25519_key" "/etc/dropbear/dropbear_ed25519_host_key"
     fi
 }
 
