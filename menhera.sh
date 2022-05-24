@@ -37,7 +37,7 @@ menhera::__compat_restart_ssh() {
         systemctl daemon-reload
 
         if [ "${SSHD}" = "openssh" ]; then
-            systemctl enable ssh
+            ! systemctl enable ssh
             systemctl reset-failed ssh
             if ! systemctl restart ssh; then
                 >&2 echo "[-] SSH daemon start failed, try resetting config..."
@@ -48,7 +48,7 @@ menhera::__compat_restart_ssh() {
                 fi
             fi
         elif [ "${SSHD}" = "dropbear" ]; then
-            systemctl enable dropbear
+            ! systemctl enable dropbear
             systemctl reset-failed dropbear
             systemctl restart dropbear
         fi
@@ -74,7 +74,7 @@ menhera::__compat_download_stdout() {
     if command -v wget > /dev/null; then
         wget -qO- --show-progress "$1"
     elif command -v curl > /dev/null; then
-        curl "$1"
+        curl -L "$1"
     else
         >&2 echo "[-] ERROR: No compatible download program is installed, try install curl or wget"
 	return 127
@@ -84,9 +84,9 @@ menhera::__compat_download_stdout() {
 # fetch URL and put the content to a file
 menhera::__compat_download_file() {
     if command -v wget > /dev/null; then
-        wget -q --show-progress -O "$2" "$1"
+        wget --continue -q --show-progress -O "$2" "$1"
     elif command -v curl > /dev/null; then
-        curl -o "$2" "$1"
+        curl -L -C - -o "$2" "$1"
     else
         >&2 echo "[-] ERROR: No compatible download program is installed, try install curl or wget"
         return 127
