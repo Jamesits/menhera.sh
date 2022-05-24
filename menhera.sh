@@ -29,6 +29,7 @@ menhera::reset_sshd_config() {
 PermitRootLogin yes
 AcceptEnv LANG LC_*
 EOF
+    return 0
 }
 
 # environment compatibility
@@ -60,8 +61,10 @@ menhera::__compat_restart_ssh() {
         fi
     else
         >&2 echo "[-] ERROR: Cannot restart SSH server, init system not recoginzed"
-        exit 1
+        return 1
     fi
+
+    return 0
 }
 
 menhera::__compat_reload_init() {
@@ -71,8 +74,10 @@ menhera::__compat_reload_init() {
         telinit u
     else
         >&2 echo "[-] ERROR: Cannot re-exec init, init system not recognized"
-        exit 1
+        return 1
     fi
+
+    return 0
 }
 
 # fetch URL and output its body to stdout
@@ -83,8 +88,10 @@ menhera::__compat_download_stdout() {
         curl -L "$1"
     else
         >&2 echo "[-] ERROR: No compatible download program is installed, try install curl or wget"
-	return 127
+	    return 127
     fi
+
+    return 0
 }
 
 # fetch URL and put the content to a file
@@ -97,6 +104,8 @@ menhera::__compat_download_file() {
         >&2 echo "[-] ERROR: No compatible download program is installed, try install curl or wget"
         return 127
     fi
+
+    return 0
 }
 
 # helper functions
@@ -127,12 +136,16 @@ menhera::get_rootfs() {
     else 
         >&2 echo "[+] \$ROOTFS is set to '$ROOTFS'"
     fi
+
+    return 0
 }
 
 menhera::sync_filesystem() {
     >&2 echo "[*] Syncing..."
     sync
     sync
+
+    return 0
 }
 
 menhera::prepare_environment() {
@@ -159,6 +172,8 @@ menhera::prepare_environment() {
 
     >&2 echo "[*] Downloading temporary rootfs..."
     menhera::__compat_download_file "${ROOTFS}" "${WORKDIR}/rootfs.squashfs"
+
+    return 0
 }
 
 menhera::mount_new_rootfs() {
@@ -167,6 +182,8 @@ menhera::mount_new_rootfs() {
     mount -t overlay overlay -o rw,lowerdir="${WORKDIR}/newrootro",upperdir="${WORKDIR}/newrootrw",workdir="${WORKDIR}/overlayfs_workdir" "${WORKDIR}/newroot"
 
     NEWROOT="${WORKDIR}/newroot"
+
+    return 0
 }
 
 menhera::install_software() {
@@ -188,6 +205,8 @@ menhera::install_software() {
         ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_ecdsa_key" "/etc/dropbear/dropbear_ecdsa_host_key"
         ! chroot "${NEWROOT}" dropbearconvert openssh dropbear "/etc/ssh/ssh_host_ed25519_key" "/etc/dropbear/dropbear_ed25519_host_key"
     fi
+
+    return 0
 }
 
 menhera::copy_config() {
@@ -220,6 +239,8 @@ run "fuser -kvm /mnt/oldroot; fuser -kvm -15 /mnt/oldroot" to kill them.
 
 Have a lot of fun...
 EOF
+
+    return 0
 }
 
 menhera::swap_root() {
@@ -247,6 +268,8 @@ menhera::swap_root() {
 
     >&2 echo "[*] Restarting SSH daemon..."
     menhera::__compat_restart_ssh
+
+    return 0
 }
 
 menhera::clear_processes() {
@@ -261,6 +284,8 @@ menhera::clear_processes() {
     >&2 echo "[*] Killing all programs still using the old root... Goodbye! See you on the other side~"
     fuser -kvm "${OLDROOT}" -15
     # in most cases the parent process of this script will be killed, so goodbye
+
+    return 0
 }
 
 # main procedure
