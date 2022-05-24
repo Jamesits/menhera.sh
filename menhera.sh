@@ -317,5 +317,6 @@ if menhera::confirm; then
 else
     echo -e "Please manually issue a reboot to recover your old OS. If you believe there is a bug in menhera.sh, "
     echo -e "raise a ticket at https://github.com/Jamesits/menhera.sh/issues ."
+    echo -e "Force reboot by \"echo b > /proc/sysrq-trigger\"."
     exit 1
 fi
