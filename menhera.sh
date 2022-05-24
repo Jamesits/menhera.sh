@@ -8,6 +8,7 @@ TEMP_ROOTFS_DISTRO="debian"
 TEMP_ROOTFS_FLAVOR="bullseye"
 WORKDIR="/tmp/menhera"
 ROOTFS=""
+SSHD="dropbear" # or "openssh"
 
 declare -A ARCH_MAP=(
     ["x86_64"]="amd64"
@@ -34,22 +35,22 @@ EOF
 menhera::__compat_restart_ssh() {
     if [ -x "$(command -v systemctl)" ]; then
         systemctl daemon-reload
-        if ! systemctl restart ssh; then
-            >&2 echo "[-] SSH daemon start failed, try resetting config..."
-            menhera::reset_sshd_config
+
+        if [ "${SSHD}" = "openssh" ]; then
+            systemctl enable ssh
+            systemctl reset-failed ssh
             if ! systemctl restart ssh; then
-                >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
-                sh
+                >&2 echo "[-] SSH daemon start failed, try resetting config..."
+                menhera::reset_sshd_config
+                if ! systemctl restart ssh; then
+                    >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
+                    sh
+                fi
             fi
-        fi
-    elif [ -x "$(command -v service)" ]; then
-        if ! service ssh restart; then
-            >&2 echo "[-] SSH daemon start failed, try resetting config..."
-            menhera::reset_sshd_config
-            if ! service ssh restart; then
-                >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually fix SSH daemon and exit."
-                sh
-            fi
+        elif [ "${SSHD}" = "dropbear" ]; then
+            systemctl enable dropbear
+            systemctl reset-failed dropbear
+            systemctl restart dropbear
         fi
     else
         >&2 echo "[-] ERROR: Cannot restart SSH server, init system not recoginzed"
@@ -163,13 +164,31 @@ menhera::mount_new_rootfs() {
 }
 
 menhera::install_software() {
-    >&2 echo "[*] Installing OpenSSH Server into new rootfs..."
+    >&2 echo "[*] Installing SSH Server into new rootfs..."
 
     # disable APT cache
     echo -e 'Dir::Cache "";\nDir::Cache::archives "";' > "${NEWROOT}/etc/apt/apt.conf.d/00_disable-cache-directories"
 
     DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get update -y
-    DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y openssh-server
+    if [ "${SSHD}" = "openssh" ]; then
+        DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y openssh-server
+    elif [ "${SSHD}" = "dropbear" ]; then
+        DEBIAN_FRONTEND=noninteractive chroot "${NEWROOT}" apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dropbear-bin
+
+        cat > "${NEWROOT}/etc/systemd/system/dropbear.service" <<EOF
+[Unit]
+Description=Dropbear SSH Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/dropbear -r /etc/ssh/ssh_host_ed25519_key -r /etc/ssh/ssh_host_rsa_key -R -F -E -m -K 30
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+    fi
 }
 
 menhera::copy_config() {
@@ -179,6 +198,7 @@ menhera::copy_config() {
     ! cp -ax "${OLDROOT}/etc/"{passwd,shadow} "${NEWROOT}/etc"
     ! cp -axr "${OLDROOT}/root/.ssh" "${NEWROOT}/root"
 
+    mkdir -p "${NEWROOT}/etc/ssh"
     ! chmod 600 -- "${NEWROOT}/etc/ssh/"*_key
     ! chown -R root:root -- "${NEWROOT}/root/.ssh"
     ! find "${NEWROOT}/root/.ssh" -type f -exec chmod 600 -- {} +
