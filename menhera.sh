@@ -277,6 +277,21 @@ menhera::swap_root() {
     return 0
 }
 
+menhera::show_hostkey_fingerprint() {
+    command -v ssh-keygen >/dev/null || return 1
+
+    if [ -d "${NEWROOT}/etc/dropbear" ]; then
+        >&2 echo "[*] The ssh host key fingerprint in the \${NEWROOT}/etc/dropbear directory is being displayed..."
+        for i in $(ls "${NEWROOT}/etc/dropbear/"*_key); do dropbearkey -y -f $i | ssh-keygen -l -f -; done
+    fi
+    if [ -d "${NEWROOT}/etc/ssh" ]; then
+        >&2 echo "[*] The ssh host key fingerprint in the \${NEWROOT}/etc/ssh directory is being displayed..."
+        for i in $(ls "${NEWROOT}/etc/ssh/"*_key); do ssh-keygen -l -f $i; done
+    fi
+
+    return 0
+}
+
 menhera::clear_processes() {
     >&2 echo "[*] Disabling swap..."
     swapoff -a
@@ -330,6 +345,8 @@ menhera::mount_new_rootfs
 menhera::copy_config
 menhera::install_software
 menhera::swap_root
+
+menhera::show_hostkey_fingerprint
 
 echo -e "If you are connecting from SSH, please create a second session to this host use root and"
 echo -e "confirm you can get a shell. Host key might change - use \"ssh-keygen -R hostname-or-ip\" to purge the"
