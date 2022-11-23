@@ -4,11 +4,11 @@ set -Eeuo pipefail
 set +h
 
 # config
-TEMP_ROOTFS_DISTRO="debian"
-TEMP_ROOTFS_FLAVOR="bullseye"
-WORKDIR="/tmp/menhera"
-ROOTFS=""
-SSHD="dropbear" # or "openssh"
+: ${TEMP_ROOTFS_DISTRO:="debian"}
+: ${TEMP_ROOTFS_FLAVOR:="bullseye"}
+: ${WORKDIR:="/tmp/menhera"}
+: ${ROOTFS:=""}
+: ${SSHD:="dropbear"} # or "openssh"
 
 declare -A ARCH_MAP=(
     ["x86_64"]="amd64"
