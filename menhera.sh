@@ -32,20 +32,29 @@ EOF
     return 0
 }
 
+menhera::__compat_sshd_name() {
+    if systemctl list-unit-files sshd.service >/dev/null; then
+        echo sshd
+    else
+        echo ssh
+    fi
+}
+
 # environment compatibility
 menhera::__compat_restart_ssh() {
     if [ -x "$(command -v systemctl)" ]; then
+        sshd_name=$(menhera::__compat_sshd_name)
         ! systemctl daemon-reload
-        ! systemctl stop ssh
-        ! systemctl stop sshd # RPM distro compatiblity
+        ! systemctl stop "${sshd_name}"
 
         if [ "${SSHD}" = "openssh" ]; then
-            ! systemctl enable ssh
-            ! systemctl reset-failed ssh
-            if ! systemctl restart ssh; then
+            sshd_name=$(menhera::__compat_sshd_name)
+            ! systemctl enable "${sshd_name}"
+            ! systemctl reset-failed "${sshd_name}"
+            if ! systemctl restart "${sshd_name}"; then
                 >&2 echo "[-] SSH daemon start failed, try resetting config..."
                 menhera::reset_sshd_config
-                if ! systemctl restart ssh; then
+                if ! systemctl restart "${sshd_name}"; then
                     >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually launch a forking SSH daemon and exit."
                     sh
                 fi
