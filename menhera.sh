@@ -7,7 +7,7 @@ set +h
 : ${TEMP_ROOTFS_DISTRO:="debian"}
 : ${TEMP_ROOTFS_FLAVOR:="bullseye"}
 : ${WORKDIR:="/tmp/menhera"}
-: ${ROOTFS:=""}
+: ${ROOTFS:=}
 : ${SSHD:="dropbear"} # or "openssh"
 
 declare -A ARCH_MAP=(
@@ -128,7 +128,7 @@ menhera::confirm() {
 
 # jobs
 menhera::get_rootfs() {
-    if [ -n ${ROOTFS} ]; then 
+    if [ -z "${ROOTFS}" ]; then
         >&2 echo "[*] Getting rootfs URL..."
 
         # forgive me for parsing HTML with these shit
