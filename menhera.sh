@@ -4,6 +4,7 @@ set -Eeuo pipefail
 set +h
 
 # config
+: ${INSTALL_PKG:="true"}
 : ${TEMP_ROOTFS_DISTRO:="debian"}
 : ${TEMP_ROOTFS_FLAVOR:="bullseye"}
 : ${WORKDIR:="/tmp/menhera"}
@@ -199,6 +200,8 @@ menhera::mount_new_rootfs() {
 }
 
 menhera::install_software() {
+    [ ${INSTALL_PKG} != "true" ] && >&2 echo "[-] New rootfs skip installing packages." && return 0
+
     >&2 echo "[*] Installing SSH Server into new rootfs..."
 
     # disable APT cache
