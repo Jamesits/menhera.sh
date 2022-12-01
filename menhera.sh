@@ -34,7 +34,7 @@ EOF
 }
 
 menhera::__compat_sshd_name() {
-    if systemctl list-unit-files sshd.service >/dev/null; then
+    if systemctl list-units ssh.service | grep "0 loaded" >/dev/null; then
         echo sshd
     else
         echo ssh
