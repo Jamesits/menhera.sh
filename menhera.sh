@@ -51,10 +51,11 @@ menhera::__compat_restart_ssh() {
             sshd_name=$(menhera::__compat_sshd_name)
             ! systemctl enable "${sshd_name}"
             ! systemctl reset-failed "${sshd_name}"
-            if ! systemctl restart "${sshd_name}"; then
+            if ! { systemctl restart "${sshd_name}" && sleep 2; } || ! systemctl is-active "${sshd_name}" >/dev/null; then
                 >&2 echo "[-] SSH daemon start failed, try resetting config..."
                 menhera::reset_sshd_config
-                if ! systemctl restart "${sshd_name}"; then
+                systemctl reset-failed "${sshd_name}"
+                if ! { systemctl restart "${sshd_name}" && sleep 2; } || ! systemctl is-active "${sshd_name}" >/dev/null; then
                     >&2 echo "[!] SSH daemon fail to start, dropping you to a shell; please manually launch a forking SSH daemon and exit."
                     sh
                 fi
